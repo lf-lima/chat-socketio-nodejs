@@ -1,22 +1,95 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat width socket io</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 </head>
 
 <body>
-  <div></div>
+  <div class="container">
+    <div class="row justify-content-center mt-2" id="username-container">
+      <div class="col-3 border border-dark card">
+        <label for="username">Digite seu nome de usuário</label>
+        <input type="text" class="form-control mt-2" id="username">
+        <button id="btn-enter-user" type="button" class="btn btn-primary mt-2 mb-2" onclick="enterUser()">Entrar</button>
+      </div>
+    </div>
+
+    <div id="chat-container" class="row justify-content-center mt-2">
+      <div class="col-8 p-2 border border-dark card">
+        <div class="border border-dark mb-2 p-2 card" id="messages-container">
+          
+        </div>
+        <div class="row">
+          <div class="col-10">
+            <input type="text" class="form-control" id="message">
+          </div>
+          <div class="col-2">
+            <button type="button" class="btn btn-primary w-100" id="btn-send-msg" onclick="sendMessage()">Enviar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>
 
-<script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>
+<script src="https://cdn.socket.io/4.4.1/socket.io.min.js"
+  integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>
 <script>
-  const socket = io()
-  console.log('AAA')
-  socket.emit('hello', 'world')
+  const socket = io.connect('http://localhost:3333/')
+  const usernameContainer = document.getElementById('username-container')
+  const chatContainer = document.getElementById('chat-container')
+  const messagesContainer = document.getElementById('messages-container')
+  chatContainer.hidden = true
+
+  let username = ''
+  function enterUser () {
+    const inputUsername = document.getElementById('username')
+
+    socket.emit('user:enter', inputUsername.value)
+
+    username = inputUsername.value
+    inputUsername.value = ''
+    usernameContainer.hidden = true
+    chatContainer.hidden = false
+  }
+
+  function sendMessage () {
+    const inputMessage = document.getElementById('message')
+
+    renderMessage({ username, message: inputMessage.value })
+
+    socket.emit('message:send', inputMessage.value)
+
+    inputMessage.value = ''
+  }
+
+  function renderMessage ({ username, message }) {
+    const newMessageDiv = document.createElement("div")
+    const newMessage = document.createElement("p")
+    newMessage.innerText = `${username}: ${message}`
+
+    newMessageDiv.appendChild(newMessage)
+    messagesContainer.appendChild(newMessageDiv)
+  }
+
+  socket.on('message:new', (data) => {
+    renderMessage(data)
+  })
+
+  socket.on('message:render-olds', messages => {
+    for (const messageData of messages) {
+      renderMessage(messageData)
+    }
+  })
 </script>
