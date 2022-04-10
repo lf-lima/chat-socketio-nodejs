@@ -3,6 +3,8 @@ const { createServer } = require('http')
 const { Server } = require('socket.io')
 const path = require('path')
 
+const port = process.env.PORT || 3000
+
 const app = express()
 const httpServer = createServer(app)
 const io = new Server(httpServer, { cors: { origin: '*' } })
@@ -34,6 +36,6 @@ io.on('connection', socket => {
   })
 })
 
-httpServer.listen(3333, () => {
-  console.log('App listen port http://localhost:3333')
+httpServer.listen(port, () => {
+  console.log(`App listen port http://localhost:${port}`)
 })

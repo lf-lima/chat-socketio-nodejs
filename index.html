@@ -19,21 +19,24 @@
       <div class="col-3 border border-dark card">
         <label for="username">Digite seu nome de usuário</label>
         <input type="text" class="form-control mt-2" id="username">
-        <button id="btn-enter-user" type="button" class="btn btn-primary mt-2 mb-2" onclick="enterUser()">Entrar</button>
+        <button id="btn-enter-user" type="button" class="btn btn-primary mt-2 mb-2"
+          onclick="enterUser()">Entrar</button>
       </div>
     </div>
 
     <div id="chat-container" class="row justify-content-center mt-2">
       <div class="col-8 p-2 border border-dark card">
-        <div class="border border-dark mb-2 p-2 card" id="messages-container">
-          
+        <div style="overflow: auto; max-height: 600px;" class="border border-dark mb-2 p-2 card"
+          id="messages-container">
+
         </div>
         <div class="row">
           <div class="col-10">
             <input type="text" class="form-control" id="message">
           </div>
           <div class="col-2">
-            <button type="button" class="btn btn-primary w-100" id="btn-send-msg" onclick="sendMessage()">Enviar</button>
+            <button type="button" class="btn btn-primary w-100" id="btn-send-msg"
+              onclick="sendMessage()">Enviar</button>
           </div>
         </div>
       </div>
@@ -46,14 +49,23 @@
 <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"
   integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>
 <script>
-  const socket = io.connect('http://localhost:3333/')
+  const pathToConnect = window.location.origin
+  const socket = io.connect(pathToConnect)
   const usernameContainer = document.getElementById('username-container')
   const chatContainer = document.getElementById('chat-container')
   const messagesContainer = document.getElementById('messages-container')
   chatContainer.hidden = true
 
+  const input = document.getElementById("message")
+  input.addEventListener("keyup", function (event) {
+    if (event.keyCode === 13) {
+      event.preventDefault()
+      document.getElementById("btn-send-msg").click()
+    }
+  })
+
   let username = ''
-  function enterUser () {
+  function enterUser() {
     const inputUsername = document.getElementById('username')
 
     socket.emit('user:enter', inputUsername.value)
@@ -64,20 +76,21 @@
     chatContainer.hidden = false
   }
 
-  function sendMessage () {
+  function sendMessage() {
     const inputMessage = document.getElementById('message')
 
     renderMessage({ username, message: inputMessage.value })
+    messagesContainer.scrollTop = messagesContainer.scrollHeight
 
     socket.emit('message:send', inputMessage.value)
 
     inputMessage.value = ''
   }
 
-  function renderMessage ({ username, message }) {
+  function renderMessage({ username, message }) {
     const newMessageDiv = document.createElement("div")
     const newMessage = document.createElement("p")
-    newMessage.innerText = `${username}: ${message}`
+    newMessage.innerHTML = `<b>${username}</b>: ${message}`
 
     newMessageDiv.appendChild(newMessage)
     messagesContainer.appendChild(newMessageDiv)
