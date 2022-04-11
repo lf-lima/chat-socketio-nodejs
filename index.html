@@ -94,6 +94,7 @@
 
     newMessageDiv.appendChild(newMessage)
     messagesContainer.appendChild(newMessageDiv)
+    messagesContainer.scrollTop = messagesContainer.scrollHeight
   }
 
   socket.on('message:new', (data) => {
